@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ChevronUpIcon, GithubIcon, LinkedinIcon, ZoomInIcon, MoonIcon, SunIcon } from 'lucide-react'
+import { ChevronUp, Github, Linkedin, ZoomIn, Moon, Sun } from 'lucide-react'
 
 // Define the Work type
 type Work = {
@@ -592,15 +592,15 @@ export default function Home() {
           </Link>
           <nav className="flex items-center space-x-4">
             <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="p-2">
-              <GithubIcon className="h-5 w-5" />
+              <Github className="h-5 w-5" />
               <span className="sr-only">GitHub</span>
             </a>
             <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="p-2">
-              <LinkedinIcon className="h-5 w-5" />
+              <Linkedin className="h-5 w-5" />
               <span className="sr-only">LinkedIn</span>
             </a>
             <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-base-200 transition-colors">
-              {theme === 'light' ? <MoonIcon className="h-5 w-5" /> : <SunIcon className="h-5 w-5" />}
+              {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
             </button>
           </nav>
         </div>
@@ -656,7 +656,7 @@ export default function Home() {
                     )}
                     {work.type === 'audio' && !work.previewImage && (
                       <div className="flex h-full w-full items-center justify-center bg-base-300">
-                        <ZoomInIcon className="h-16 w-16 text-base-content/30" />
+                        <ZoomIn className="h-16 w-16 text-base-content/30" />
                       </div>
                     )}
                     {work.type === 'text' && !work.previewImage && (
@@ -694,7 +694,7 @@ export default function Home() {
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         aria-label="Scroll to top"
       >
-        <ChevronUpIcon className="h-5 w-5" />
+        <ChevronUp className="h-5 w-5" />
       </button>
 
       {modalContent && (
