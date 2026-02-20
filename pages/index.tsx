@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ChevronUp, Github, Linkedin, ZoomIn, Moon, Sun } from 'lucide-react'
+import { ChevronUp, Github, Linkedin, ZoomIn, Moon, Sun, Search } from 'lucide-react'
 
 // Define the Work type
 type Work = {
@@ -549,6 +549,7 @@ const works: Work[] = [
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'all' | Work['type']>('all')
+  const [searchQuery, setSearchQuery] = useState('')
   const [modalContent, setModalContent] = useState<Work | null>(null)
   const [theme, setTheme] = useState('light')
 
@@ -568,9 +569,13 @@ export default function Home() {
 
   const sortedWorks = [...works].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
-  const filteredWorks = activeTab === 'all'
-    ? sortedWorks
-    : sortedWorks.filter(work => work.type === activeTab)
+  const filteredWorks = sortedWorks.filter(work => {
+    const matchesTab = activeTab === 'all' || work.type === activeTab
+    const matchesSearch = work.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      work.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      work.tool.toLowerCase().includes(searchQuery.toLowerCase())
+    return matchesTab && matchesSearch
+  })
 
   const openModal = (work: Work) => setModalContent(work)
   const closeModal = () => setModalContent(null)
@@ -616,16 +621,29 @@ export default function Home() {
           </p>
         </section>
 
-        <div className="mb-8 flex justify-center space-x-2">
-          {['all', 'image', 'video', 'audio', 'text', 'embed'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab as 'all' | Work['type'])}
-              className={`px-4 py-2 rounded-md transition-colors ${activeTab === tab ? 'bg-primary text-primary-content' : 'bg-base-300 text-base-content hover:bg-base-content/10'}`}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
+        <div className="mb-6 flex flex-col items-center space-y-4">
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-base-content/50" />
+            <input
+              type="text"
+              placeholder="Cerca progetti per nome, descrizione o tool..."
+              className="input input-bordered w-full pl-10 focus:input-primary"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-2">
+            {['all', 'image', 'video', 'audio', 'text', 'embed'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab as 'all' | Work['type'])}
+                className={`px-4 py-2 rounded-md transition-colors ${activeTab === tab ? 'bg-primary text-primary-content' : 'bg-base-300 text-base-content hover:bg-base-content/10'}`}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
+          </div>
         </div>
 
         <section className="mb-16">
