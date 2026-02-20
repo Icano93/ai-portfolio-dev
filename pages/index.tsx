@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ChevronUp, Github, Linkedin, ZoomIn, Moon, Sun, Search } from 'lucide-react'
+import { ChevronUp, Github, Linkedin, ZoomIn, Moon, Sun, Search, XCircle, Users } from 'lucide-react'
 
 // Define the Work type
 type Work = {
@@ -550,8 +550,28 @@ const works: Work[] = [
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'all' | Work['type']>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedYear, setSelectedYear] = useState<string | null>(null)
+  const [showYearSelector, setShowYearSelector] = useState(false)
   const [modalContent, setModalContent] = useState<Work | null>(null)
   const [theme, setTheme] = useState('light')
+  const [isHovered, setIsHovered] = useState(false)
+  const [displayText, setDisplayText] = useState('')
+
+  const fullText = "Explore our diverse collection of generative AI content, spanning across various mediums including images, videos, audio, and interactive experiences. Analysis and developments focused on the field of design and architecture, mixed with data management and artistic and installation creations for the recreation of immersive and innovative environments."
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    if (isHovered) {
+      if (displayText.length < fullText.length) {
+        timeout = setTimeout(() => {
+          setDisplayText(fullText.slice(0, displayText.length + 1));
+        }, 15); // Adjust speed here - "not slow"
+      }
+    } else {
+      setDisplayText('');
+    }
+    return () => clearTimeout(timeout);
+  }, [isHovered, displayText])
 
   useEffect(() => {
     // Initialize theme from localStorage or system preference
@@ -574,7 +594,8 @@ export default function Home() {
     const matchesSearch = work.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       work.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       work.tool.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesTab && matchesSearch
+    const matchesYear = !selectedYear || work.date.startsWith(selectedYear)
+    return matchesTab && matchesSearch && matchesYear
   })
 
   const openModal = (work: Work) => setModalContent(work)
@@ -596,6 +617,10 @@ export default function Home() {
             <span className="hidden font-bold sm:inline-block">GenAI Portfolio</span>
           </Link>
           <nav className="flex items-center space-x-4">
+            <Link href="/people" className="p-2 hover:text-primary transition-colors">
+              <Users className="h-5 w-5" />
+              <span className="sr-only">Team</span>
+            </Link>
             <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="p-2">
               <Github className="h-5 w-5" />
               <span className="sr-only">GitHub</span>
@@ -612,94 +637,154 @@ export default function Home() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <section className="mb-12 text-center">
-          <h1 className="mb-4 text-4xl font-bold">Creative Generative AI - Dev Team</h1>
-          <p className="mb-6 text-xl text-base-content/70">atiprj - Research & Development Department</p>
-          <p className="mx-auto max-w-2xl text-base-content/70">
-            Explore our diverse collection of generative AI content, spanning across various mediums including images, videos, audio, and interactive experiences.
-            Analysis and developments focused on the field of design and architecture, mixed with data management and artistic and installation creations for the recreation of immersive and innovative environments.
-          </p>
+        <section className="mb-12 text-left">
+          <h1
+            className="mb-4 text-4xl font-bold cursor-default inline-block"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            ATI - R&D Departement
+          </h1>
+          <div className="min-h-[5rem]">
+            <p className="text-xl text-base-content/70 text-justify" style={{ textAlignLast: 'left' }}>
+              {displayText}
+              {isHovered && displayText.length < fullText.length && <span className="animate-pulse">|</span>}
+            </p>
+          </div>
         </section>
 
-        <div className="mb-6 flex flex-col items-center space-y-4">
-          <div className="relative w-full max-w-md">
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-base-content/50" />
-            <input
-              type="text"
-              placeholder="Cerca progetti per nome, descrizione o tool..."
-              className="input input-bordered w-full pl-10 focus:input-primary"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-2">
+        <div className="mb-8 flex flex-col md:flex-row items-start justify-between gap-4">
+          <div className="flex flex-wrap justify-start gap-2 items-center">
             {['all', 'image', 'video', 'audio', 'text', 'embed'].map((tab) => (
               <button
                 key={tab}
-                onClick={() => setActiveTab(tab as 'all' | Work['type'])}
-                className={`px-4 py-2 rounded-md transition-colors ${activeTab === tab ? 'bg-primary text-primary-content' : 'bg-base-300 text-base-content hover:bg-base-content/10'}`}
+                onClick={() => {
+                  setActiveTab(tab as 'all' | Work['type'])
+                  setSelectedYear(null)
+                  setShowYearSelector(false)
+                }}
+                className={`px-4 py-2 rounded-md transition-colors ${activeTab === tab && !showYearSelector ? 'bg-primary text-primary-content' : 'bg-base-300 text-base-content hover:bg-base-content/10'}`}
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
             ))}
+
+            <button
+              onClick={() => setShowYearSelector(!showYearSelector)}
+              className={`px-4 py-2 rounded-md transition-all duration-300 ${showYearSelector ? 'bg-secondary text-secondary-content' : 'bg-base-300 text-base-content hover:bg-base-content/10'}`}
+            >
+              Year
+            </button>
+
+            <div className={`flex gap-2 overflow-hidden transition-all duration-500 ease-in-out ${showYearSelector ? 'max-w-md opacity-100 ml-2' : 'max-w-0 opacity-0 ml-0 h-0'}`}>
+              {['2024', '2025', '2026'].map((year) => (
+                <button
+                  key={year}
+                  onClick={() => setSelectedYear(selectedYear === year ? null : year)}
+                  className={`px-4 py-2 rounded-md font-medium transition-all duration-300 shadow-sm ${selectedYear === year
+                    ? 'bg-gradient-to-r from-purple-700 to-indigo-700 text-white scale-105'
+                    : 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white/90 hover:from-purple-600 hover:to-indigo-600'
+                    }`}
+                >
+                  {year}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="relative w-full max-w-xs md:ml-auto">
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-base-content/50" />
+            <input
+              type="text"
+              placeholder="Cerca..."
+              className="input input-bordered w-full pl-10 pr-10 focus:input-primary"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-primary transition-colors"
+                aria-label="Clear search"
+              >
+                <XCircle className="h-5 w-5" />
+              </button>
+            )}
           </div>
         </div>
 
         <section className="mb-16">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredWorks.map((work) => (
-              <div key={work.id} className="group relative overflow-hidden rounded-lg bg-base-100 shadow-md transition-all duration-300 ease-in-out hover:z-10 hover:scale-105 hover:shadow-xl">
-                <button onClick={() => openModal(work)} className="w-full text-left">
-                  <div className="relative aspect-video w-full overflow-hidden">
-                    {(work.type === 'image' || work.previewImage) && (
-                      <Image
-                        src={work.type === 'image' ? work.content : work.previewImage!}
-                        alt={work.title}
-                        layout="fill"
-                        objectFit="cover"
-                        className="transition-transform duration-300 group-hover:scale-110"
-                      />
-                    )}
-                    {work.type === 'video' && !work.previewImage && (
-                      <video
-                        src={work.content}
-                        className="h-full w-full object-cover"
-                        muted
-                        loop
-                        playsInline
-                        onMouseOver={(e) => e.currentTarget.play()}
-                        onMouseOut={(e) => e.currentTarget.pause()}
-                      />
-                    )}
-                    {work.type === 'audio' && !work.previewImage && (
-                      <div className="flex h-full w-full items-center justify-center bg-base-300">
-                        <ZoomIn className="h-16 w-16 text-base-content/30" />
-                      </div>
-                    )}
-                    {work.type === 'text' && !work.previewImage && (
-                      <div className="flex h-full w-full items-center justify-center bg-base-300">
-                        <span className="text-2xl font-bold text-base-content/30">Aa</span>
-                      </div>
-                    )}
-                    {work.type === 'embed' && !work.previewImage && (
-                      <div className="flex h-full w-full items-center justify-center bg-base-300">
-                        <span className="text-2xl font-bold text-base-content/30">&lt;/&gt;</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent p-4 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <h3 className="text-lg font-semibold text-white">{work.title}</h3>
-                    <p className="text-sm text-gray-200">{work.description}</p>
-                    <div className="mt-2 flex justify-between text-xs text-gray-300">
-                      <span>{work.date}</span>
-                      <span>{work.tool}</span>
+          {filteredWorks.length > 0 ? (
+            <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+              {filteredWorks.map((work) => (
+                <div key={work.id} className="break-inside-avoid group relative overflow-hidden rounded-lg bg-base-100 shadow-md transition-all duration-300 ease-in-out hover:z-10 hover:scale-105 hover:shadow-xl">
+                  <button onClick={() => openModal(work)} className="w-full text-left">
+                    <div className={`relative w-full overflow-hidden ${work.id % 3 === 0 ? 'aspect-[4/5]' :
+                      work.id % 2 === 0 ? 'aspect-square' :
+                        'aspect-video'
+                      }`}>
+                      {(work.type === 'image' || work.previewImage) && (
+                        <Image
+                          src={work.type === 'image' ? work.content : work.previewImage!}
+                          alt={work.title}
+                          layout="fill"
+                          objectFit="cover"
+                          className="transition-transform duration-300 group-hover:scale-110"
+                        />
+                      )}
+                      {work.type === 'video' && !work.previewImage && (
+                        <video
+                          src={work.content}
+                          className="h-full w-full object-cover"
+                          muted
+                          loop
+                          playsInline
+                          onMouseOver={(e) => e.currentTarget.play()}
+                          onMouseOut={(e) => e.currentTarget.pause()}
+                        />
+                      )}
+                      {work.type === 'audio' && !work.previewImage && (
+                        <div className="flex h-full w-full items-center justify-center bg-base-300">
+                          <ZoomIn className="h-16 w-16 text-base-content/30" />
+                        </div>
+                      )}
+                      {work.type === 'text' && !work.previewImage && (
+                        <div className="flex h-full w-full items-center justify-center bg-base-300">
+                          <span className="text-2xl font-bold text-base-content/30">Aa</span>
+                        </div>
+                      )}
+                      {work.type === 'embed' && !work.previewImage && (
+                        <div className="flex h-full w-full items-center justify-center bg-base-300">
+                          <span className="text-2xl font-bold text-base-content/30">&lt;/&gt;</span>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                </button>
-              </div>
-            ))}
-          </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent p-4 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <h3 className="text-lg font-semibold text-white">{work.title}</h3>
+                      <p className="text-sm text-gray-200">{work.description}</p>
+                      <div className="mt-2 flex justify-between text-xs text-gray-300">
+                        <span>{work.date}</span>
+                        <span>{work.tool}</span>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20">
+              <p className="text-xl text-base-content/50">Nessun progetto trovato per "{searchQuery}"</p>
+              <button
+                onClick={() => {
+                  setSearchQuery('')
+                  setActiveTab('all')
+                }}
+                className="btn btn-ghost btn-sm mt-4 text-primary"
+              >
+                Resetta tutti i filtri
+              </button>
+            </div>
+          )}
         </section>
       </main>
 
@@ -715,84 +800,92 @@ export default function Home() {
         <ChevronUp className="h-5 w-5" />
       </button>
 
-      {modalContent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm" onClick={closeModal}>
-          <div className="max-w-3xl w-full bg-base-100 p-4 rounded-lg shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            {modalContent.type === 'image' && (
-              <Image
-                src={modalContent.content}
-                alt={modalContent.title}
-                width={800}
-                height={600}
-                layout="responsive"
-                objectFit="contain"
-              />
-            )}
-            {modalContent.type === 'video' && (
-              <video src={modalContent.content} controls className="w-full" />
-            )}
-            {modalContent.type === 'audio' && (
-              <div>
-                {modalContent.previewImage && (
-                  <Image
-                    src={modalContent.previewImage}
-                    alt={modalContent.title}
-                    width={800}
-                    height={400}
-                    layout="responsive"
-                    objectFit="cover"
-                  />
+      {
+        modalContent && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={closeModal}>
+            <div className="max-w-5xl w-full bg-base-100 rounded-lg shadow-2xl overflow-hidden flex flex-col md:flex-row h-auto max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+              {/* Visual Content (Left Column) */}
+              <div className="w-full md:w-3/5 bg-black flex items-center justify-center overflow-hidden">
+                {modalContent.type === 'image' && (
+                  <div className="relative w-full h-full min-h-[300px] md:min-h-[500px]">
+                    <Image
+                      src={modalContent.content}
+                      alt={modalContent.title}
+                      layout="fill"
+                      objectFit="contain"
+                    />
+                  </div>
                 )}
-                <audio src={modalContent.content} controls className="w-full mt-4" />
+                {modalContent.type === 'video' && (
+                  <video src={modalContent.content} controls className="max-w-full max-h-full" />
+                )}
+                {modalContent.type === 'audio' && (
+                  <div className="p-8 w-full">
+                    {modalContent.previewImage && (
+                      <div className="relative aspect-video w-full mb-4">
+                        <Image
+                          src={modalContent.previewImage}
+                          alt={modalContent.title}
+                          layout="fill"
+                          objectFit="cover"
+                          className="rounded-lg"
+                        />
+                      </div>
+                    )}
+                    <audio src={modalContent.content} controls className="w-full" />
+                  </div>
+                )}
+                {modalContent.type === 'text' && (
+                  <div className="p-8 w-full max-h-full overflow-y-auto bg-base-200 text-base-content">
+                    {modalContent.previewImage && (
+                      <div className="relative aspect-video w-full mb-4">
+                        <Image
+                          src={modalContent.previewImage}
+                          alt={modalContent.title}
+                          layout="fill"
+                          objectFit="cover"
+                          className="rounded-lg"
+                        />
+                      </div>
+                    )}
+                    <p className="whitespace-pre-wrap">{modalContent.content}</p>
+                  </div>
+                )}
+                {modalContent.type === 'embed' && (
+                  <div className="w-full h-full min-h-[400px]">
+                    <iframe src={modalContent.content} className="w-full h-full" title={modalContent.title} />
+                  </div>
+                )}
               </div>
-            )}
-            {modalContent.type === 'text' && (
-              <div>
-                {modalContent.previewImage && (
-                  <Image
-                    src={modalContent.previewImage}
-                    alt={modalContent.title}
-                    width={800}
-                    height={400}
-                    layout="responsive"
-                    objectFit="cover"
-                  />
-                )}
-                <div className="max-h-96 overflow-y-auto mt-4">
-                  <p>{modalContent.content}</p>
+
+              {/* Information (Right Column) */}
+              <div className="w-full md:w-2/5 p-6 md:p-8 flex flex-col justify-between overflow-y-auto bg-base-100">
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-bold text-base-content mb-4">{modalContent.title}</h2>
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    <span className="badge badge-primary">{modalContent.type}</span>
+                    <span className="badge badge-outline">{modalContent.tool}</span>
+                    <span className="text-xs self-center text-base-content/50 ml-auto">{modalContent.date}</span>
+                  </div>
+                  <div className="divider"></div>
+                  <p className="text-base-content/80 leading-relaxed text-justify">
+                    {modalContent.description}
+                  </p>
+                </div>
+
+                <div className="mt-8 flex justify-end">
+                  <button
+                    className="btn btn-primary btn-md md:btn-wide"
+                    onClick={closeModal}
+                  >
+                    Chiudi
+                  </button>
                 </div>
               </div>
-            )}
-            {modalContent.type === 'embed' && (
-              <div>
-                {modalContent.previewImage && (
-                  <Image
-                    src={modalContent.previewImage}
-                    alt={modalContent.title}
-                    width={800}
-                    height={400}
-                    layout="responsive"
-                    objectFit="cover"
-                  />
-                )}
-                <iframe src={modalContent.content} className="w-full h-96 mt-4" title={modalContent.title} />
-              </div>
-            )}
-            <h3 className="mt-4 text-lg font-semibold text-base-content">{modalContent.title}</h3>
-            <p className="text-sm text-base-content/70">{modalContent.description}</p>
-            <div className="mt-2 flex justify-between text-xs text-base-content/50">
-              <span>{modalContent.date}</span>
-              <span>{modalContent.tool}</span>
             </div>
-            <button
-              className="mt-4 px-4 py-2 bg-primary text-primary-content rounded-md hover:bg-primary/80 transition-colors"
-              onClick={closeModal}
-            >
-              Close
-            </button>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   )
 }
