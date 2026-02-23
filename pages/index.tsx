@@ -773,7 +773,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="text-center py-20">
-              <p className="text-xl text-base-content/50">Nessun progetto trovato per "{searchQuery}"</p>
+              <p className="text-xl text-base-content/50">Nessun progetto trovato per &quot;{searchQuery}&quot;</p>
               <button
                 onClick={() => {
                   setSearchQuery('')
