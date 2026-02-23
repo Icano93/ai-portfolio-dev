@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ChevronUp, Github, Linkedin, Users, Moon, Sun } from 'lucide-react'
+import { ChevronUp, Github, Linkedin, Users, Moon, Sun, ArrowLeft } from 'lucide-react'
 
 type TeamMember = {
     id: number;
@@ -107,10 +107,13 @@ export default function People() {
             <header className="sticky top-0 z-50 w-full border-b border-base-300 bg-base-100/95 backdrop-blur">
                 <div className="container mx-auto flex h-14 items-center justify-between px-4">
                     <Link href="/" className="flex items-center space-x-2">
-                        <span className="hidden font-bold sm:inline-block">GenAI Portfolio</span>
+                        <span className="hidden font-bold sm:inline-block">ATI R&D Department</span>
                     </Link>
                     <nav className="flex items-center space-x-4">
-                        <Link href="/people" className="p-2 text-primary">
+                        <Link href="/" className="flex items-center p-2 hover:text-primary transition-colors" title="Back to Home">
+                            <ArrowLeft className="h-5 w-5" />
+                        </Link>
+                        <Link href="/people" className="p-2 text-primary border-b-2 border-primary">
                             <Users className="h-5 w-5" />
                             <span className="sr-only">Team</span>
                         </Link>

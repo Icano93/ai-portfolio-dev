@@ -614,7 +614,7 @@ export default function Home() {
       <header className="sticky top-0 z-50 w-full border-b border-base-300 bg-base-100/95 backdrop-blur">
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="hidden font-bold sm:inline-block">GenAI Portfolio</span>
+            <span className="hidden font-bold sm:inline-block">ATI R&D Department</span>
           </Link>
           <nav className="flex items-center space-x-4">
             <Link href="/people" className="p-2 hover:text-primary transition-colors">
@@ -643,7 +643,7 @@ export default function Home() {
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
-            ATI - R&D Departement
+            R&D Lab
           </h1>
           <div className="min-h-[5rem]">
             <p className="text-xl text-base-content/70 text-justify" style={{ textAlignLast: 'left' }}>
